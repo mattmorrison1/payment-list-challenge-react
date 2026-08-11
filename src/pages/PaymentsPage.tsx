@@ -1,5 +1,6 @@
 import React, { FormEvent, useState } from "react";
 import { Container, FilterRow, SearchButton, SearchInput, Spinner, StatusBadge, TableCell, Title, ClearButton } from "../components/components";
+import { ErrorMessage } from "../components/ErrorMessage";
 import { useFetchPayments } from "../hooks/useFetchPayments";
 import { Table } from "../components/Table";
 import { Payment } from "../types/payment";
@@ -17,7 +18,7 @@ export const PaymentsPage = () => {
     currency: ''
   };
 
-  const { data: paymentData } = useFetchPayments(searchParams);
+  const { data: paymentData, error, isError } = useFetchPayments(searchParams);
 
   const columns: { key: keyof Payment; header: string; render?: (item: Payment) => React.ReactNode; }[] = [
     { key: 'id', header: I18N.TABLE_HEADER_PAYMENT_ID },
@@ -60,7 +61,9 @@ export const PaymentsPage = () => {
         </FilterRow>
       </form>
 
-      {paymentData ? (
+      {isError ? (
+        <ErrorMessage error={error} />
+      ) : paymentData ? (
         <Table<Payment> columns={columns} data={paymentData.payments} />
       ) : (
         <Spinner />
