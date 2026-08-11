@@ -7,14 +7,15 @@ type Column<T> = {
 };
 
 interface TableProps<T> {
-    columns: Column<T>[],
-    data: T[]
+    columns: Column<T>[];
+    data: T[];
+    footer?: React.ReactNode;
 }
 
 const renderCellValue = (v: unknown) =>
     v === null || v === undefined ? "" : String(v);
 
-export const Table = <T,>({ columns, data }: TableProps<T>) => {
+export const Table = <T,>({ columns, data, footer }: TableProps<T>) => {
     return (
         <TableWrapper>
             <StyledTable>
@@ -38,6 +39,7 @@ export const Table = <T,>({ columns, data }: TableProps<T>) => {
                     ))}
                 </TableBodyWrapper>
             </StyledTable>
+            {footer}
         </TableWrapper>
     );
 }

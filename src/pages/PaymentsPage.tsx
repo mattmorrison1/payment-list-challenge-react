@@ -1,6 +1,7 @@
 import React, { FormEvent, useState } from "react";
 import { Container, FilterRow, SearchButton, SearchInput, Select, Spinner, StatusBadge, TableCell, Title, ClearButton } from "../components/components";
 import { ErrorMessage } from "../components/ErrorMessage";
+import { Pagination } from "../components/Pagination";
 import { useFetchPayments } from "../hooks/useFetchPayments";
 import { Table } from "../components/Table";
 import { Payment } from "../types/payment";
@@ -9,15 +10,17 @@ import { CURRENCIES } from "../constants/index";
 import { formatDate } from "../utils/dateFormatter";
 
 export const PaymentsPage = () => {
+  const pageSize = 5;
   const [searchTerm, setSearchTerm] = useState('');
+  const [page, setPage] = useState(1);
   const [filters, setFilters] = useState({
     search: '',
     currency: '',
   });
 
   const searchParams = {
-    page: 1,
-    pageSize: 5,
+    page,
+    pageSize,
     search: filters.search,
     currency: filters.currency,
   };
@@ -35,6 +38,7 @@ export const PaymentsPage = () => {
 
   const handleSubmit = (event: FormEvent) => {
     event.preventDefault();
+    setPage(1);
     setFilters({
       search: searchTerm.trim(),
       currency: filters.currency,
@@ -45,11 +49,14 @@ export const PaymentsPage = () => {
 
   const resetFilters = () => {
     setSearchTerm('');
+    setPage(1);
     setFilters({
       search: '',
       currency: '',
     });
   }
+
+  const totalPages = paymentData ? Math.ceil(paymentData.total / pageSize) : 0;
 
   return (
     <Container>
@@ -66,12 +73,13 @@ export const PaymentsPage = () => {
           <Select
             aria-label={I18N.CURRENCY_FILTER_LABEL}
             value={filters.currency}
-            onChange={(e) =>
+            onChange={(e) => {
+              setPage(1);
               setFilters((prev) => ({
                 ...prev,
                 currency: e.target.value,
-              }))
-            }
+              }));
+            }}
           >
             <option value="">{I18N.CURRENCIES_OPTION}</option>
             {CURRENCIES.map((c) => (
@@ -91,7 +99,21 @@ export const PaymentsPage = () => {
       {isError ? (
         <ErrorMessage error={error} />
       ) : paymentData ? (
-        <Table<Payment> columns={columns} data={paymentData.payments} />
+        <Table<Payment>
+          columns={columns}
+          data={paymentData.payments}
+          footer={
+            <Pagination
+              currentPage={page}
+              totalPages={totalPages}
+              previousLabel={I18N.PREVIOUS_BUTTON}
+              nextLabel={I18N.NEXT_BUTTON}
+              pageLabel={I18N.PAGE_LABEL}
+              onPrevious={() => setPage((currentPage) => Math.max(1, currentPage - 1))}
+              onNext={() => setPage((currentPage) => currentPage + 1)}
+            />
+          }
+        />
       ) : (
         <Spinner />
       )}
