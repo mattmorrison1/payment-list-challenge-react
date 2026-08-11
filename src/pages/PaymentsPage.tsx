@@ -1,5 +1,5 @@
-import React from "react";
-import { Container, Spinner, StatusBadge, TableCell, Title } from "../components/components";
+import React, { FormEvent, useState } from "react";
+import { Container, SearchButton, SearchInput, Spinner, StatusBadge, TableCell, Title } from "../components/components";
 import { useFetchPayments } from "../hooks/useFetchPayments";
 import { Table } from "../components/Table";
 import { Payment } from "../types/payment";
@@ -7,14 +7,17 @@ import { I18N } from "../constants/i18n";
 import { formatDate } from "../utils/dateFormatter";
 
 export const PaymentsPage = () => {
-  const defaultParams = {
+  const [searchTerm, setSearchTerm] = useState('');
+  const [search, setSearch] = useState('');
+
+  const searchParams = {
     page: 1,
     pageSize: 5,
-    search: '',
+    search,
     currency: ''
   };
 
-  const { data: paymentData } = useFetchPayments(defaultParams);
+  const { data: paymentData } = useFetchPayments(searchParams);
 
   const columns: { key: keyof Payment; header: string; render?: (item: Payment) => React.ReactNode; }[] = [
     { key: 'id', header: I18N.TABLE_HEADER_PAYMENT_ID },
@@ -25,15 +28,31 @@ export const PaymentsPage = () => {
     { key: 'status', header: I18N.TABLE_HEADER_STATUS, render: (p) => <TableCell key="status"><StatusBadge status={p.status}>{p.status}</StatusBadge></TableCell>, }
   ]
 
+  const handleSubmit = (event: FormEvent) => {
+    event.preventDefault();
+    setSearch(searchTerm.trim());
+  };
+
   return (
     <Container>
-      <Title>All payments</Title>
+      <Title>{I18N.PAGE_TITLE}</Title>
+
+      <form onSubmit={handleSubmit}>
+        <SearchInput
+          aria-label={I18N.SEARCH_LABEL}
+          placeholder={I18N.SEARCH_PLACEHOLDER}
+          value={searchTerm}
+          onChange={(event) => setSearchTerm(event.target.value)}
+        />
+        <SearchButton type="submit">{I18N.SEARCH_BUTTON}</SearchButton>
+      </form>
 
       {paymentData ? (
         <Table<Payment> columns={columns} data={paymentData.payments} />
       ) : (
         <Spinner />
       )}
+
     </Container>
   );
 };
