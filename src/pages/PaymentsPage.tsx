@@ -1,21 +1,25 @@
 import React, { FormEvent, useState } from "react";
-import { Container, FilterRow, SearchButton, SearchInput, Spinner, StatusBadge, TableCell, Title, ClearButton } from "../components/components";
+import { Container, FilterRow, SearchButton, SearchInput, Select, Spinner, StatusBadge, TableCell, Title, ClearButton } from "../components/components";
 import { ErrorMessage } from "../components/ErrorMessage";
 import { useFetchPayments } from "../hooks/useFetchPayments";
 import { Table } from "../components/Table";
 import { Payment } from "../types/payment";
 import { I18N } from "../constants/i18n";
+import { CURRENCIES } from "../constants/index";
 import { formatDate } from "../utils/dateFormatter";
 
 export const PaymentsPage = () => {
   const [searchTerm, setSearchTerm] = useState('');
-  const [search, setSearch] = useState('');
+  const [filters, setFilters] = useState({
+    search: '',
+    currency: '',
+  });
 
   const searchParams = {
     page: 1,
     pageSize: 5,
-    search,
-    currency: ''
+    search: filters.search,
+    currency: filters.currency,
   };
 
   const { data: paymentData, error, isError } = useFetchPayments(searchParams);
@@ -31,14 +35,20 @@ export const PaymentsPage = () => {
 
   const handleSubmit = (event: FormEvent) => {
     event.preventDefault();
-    setSearch(searchTerm.trim());
+    setFilters({
+      search: searchTerm.trim(),
+      currency: filters.currency,
+    });
   };
 
-  const showClear = search != '';
+  const showClear = filters.search !== '' || filters.currency !== '';
 
   const resetFilters = () => {
-    setSearchTerm(''); 
-    setSearch('');
+    setSearchTerm('');
+    setFilters({
+      search: '',
+      currency: '',
+    });
   }
 
   return (
@@ -53,6 +63,23 @@ export const PaymentsPage = () => {
             value={searchTerm}
             onChange={(event) => setSearchTerm(event.target.value)}
           />
+          <Select
+            aria-label={I18N.CURRENCY_FILTER_LABEL}
+            value={filters.currency}
+            onChange={(e) =>
+              setFilters((prev) => ({
+                ...prev,
+                currency: e.target.value,
+              }))
+            }
+          >
+            <option value="">{I18N.CURRENCIES_OPTION}</option>
+            {CURRENCIES.map((c) => (
+              <option key={c} value={c}>
+                {c}
+              </option>
+            ))}
+          </Select>
           <SearchButton type="submit">{I18N.SEARCH_BUTTON}</SearchButton>
           {showClear &&
             <ClearButton type="button" onClick={resetFilters}>
