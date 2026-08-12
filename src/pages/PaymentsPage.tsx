@@ -8,6 +8,7 @@ import { Payment } from "../types/payment";
 import { I18N } from "../constants/i18n";
 import { CURRENCIES } from "../constants/index";
 import { formatDate } from "../utils/dateFormatter";
+// import { useForm } from "react-hook-form"; refactor to use react-hook-form Scalable as form inputs grow.
 
 export const PaymentsPage = () => {
   const pageSize = 5;
@@ -25,7 +26,7 @@ export const PaymentsPage = () => {
     currency: filters.currency,
   };
 
-  const { data: paymentData, error, isError } = useFetchPayments(searchParams);
+  const { data: paymentData, error, isError } = useFetchPayments(searchParams); // could also use isLoading here to display a loading state
 
   const columns: { key: keyof Payment; header: string; render?: (item: Payment) => React.ReactNode; }[] = [
     { key: 'id', header: I18N.TABLE_HEADER_PAYMENT_ID },
@@ -62,7 +63,7 @@ export const PaymentsPage = () => {
     <Container>
       <Title>{I18N.PAGE_TITLE}</Title>
 
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit} role="search" aria-label="Payments search">
         <FilterRow>
           <SearchInput
             aria-label={I18N.SEARCH_LABEL}
@@ -88,7 +89,7 @@ export const PaymentsPage = () => {
               </option>
             ))}
           </Select>
-          <SearchButton type="submit">{I18N.SEARCH_BUTTON}</SearchButton>
+          <SearchButton disabled={searchTerm === filters.search} type="submit">{I18N.SEARCH_BUTTON}</SearchButton>
           {showClear &&
             <ClearButton type="button" onClick={resetFilters}>
               {I18N.CLEAR_FILTERS}

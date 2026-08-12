@@ -87,6 +87,11 @@ export const SearchButton = styled.button`
   &:hover {
     background-color: rgb(33, 65, 154);
   }
+
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.7;
+  }
 `;
 
 export const ClearButton = styled.button`

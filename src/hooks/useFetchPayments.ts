@@ -6,6 +6,7 @@ import { PaymentsParams } from '../types/payment';
 export const useFetchPayments = (params: PaymentsParams) => {
     return useQuery({
         queryKey: ['payments', params],
-        queryFn: () => fetchPayments(params)
+        queryFn: () => fetchPayments(params),
+        // gcTime: 30000, clean up memory
     })
 }
